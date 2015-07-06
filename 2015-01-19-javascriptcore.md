@@ -76,7 +76,7 @@ NSLog(@"The first name: %@", [initialName toString]);
 // The first name: Grace
 ````
 
-> Swift shows its youth, here—while Objective-C code can take advantage of subscript notation, Swift currently only exposes the [raw methods](/object-subscripting/) that should make such subscripting possible: `objectAtKeyedSubscript()` and `objectAtIndexedSubscript()`.
+> Swift shows its youth, here—while Objective-C code can take advantage of subscript notation, Swift currently only exposes the [raw methods](/object-subscripting/) that should make such subscripting possible: `objectForKeyedSubscript()` and `objectAtIndexedSubscript()`.
 
 
 ### Calling Functions
@@ -165,7 +165,7 @@ Another way to use our custom objects from within JavaScript code is to add conf
 
 ## JavaScriptCore in Practice
 
-Let's build out an example that will use all these different techniques—we'll define a `Person` model that conforms to the `JSExport` sub-protocol `PersonJSExports`, then use JavaScript to create and populate instances from a JSON file. Who needs `NSJSONSerialization` when there's an entire JVM lying around?
+Let's build out an example that will use all these different techniques—we'll define a `Person` model that conforms to the `JSExport` sub-protocol `PersonJSExports`, then use JavaScript to create and populate instances from a JSON file. Who needs `NSJSONSerialization` when there's an entire JavaScript VM lying around?
 
 ### 1) `PersonJSExports` and `Person`
 
