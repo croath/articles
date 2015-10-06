@@ -4,6 +4,9 @@ author: Mattt Thompson
 category: Cocoa
 tags: nshipster
 excerpt: "NSSet and NSDictionary, along with NSArray are the workhorse collection classes of Foundation. Unlike other standard libraries, implementation details are hidden from developers, allowing them to write simple code and trust that it will be (reasonably) performant."
+status:
+    swift: 2.0
+    reviewed: September 11, 2015
 ---
 
 `NSSet` and `NSDictionary`, along with `NSArray` are the workhorse collection classes of Foundation. Unlike [ other standard libraries](http://en.wikipedia.org/wiki/Java_collections_framework), implementation details are [hidden](http://ridiculousfish.com/blog/posts/array.html) from developers, allowing them to write simple code and trust that it will be (reasonably) performant.
@@ -26,6 +29,14 @@ So without further ado, here's everything you need to know about two of the more
 
 ### Usage
 
+~~~{swift}
+let hashTable = NSHashTable(options: .CopyIn)
+hashTable.addObject("foo")
+hashTable.addObject("bar")
+hashTable.addObject(42)
+hashTable.removeObject("bar")
+print("Members: \(hashTable.allObjects)")
+~~~
 ~~~{objective-c}
 NSHashTable *hashTable = [NSHashTable hashTableWithOptions:NSPointerFunctionsCopyIn];
 [hashTable addObject:@"foo"];
@@ -53,10 +64,19 @@ NSLog(@"Members: %@", [hashTable allObjects]);
 - `NSMapTable` can `copy` its values on input.
 - `NSMapTable` can contain arbitrary pointers, and use pointer identity for equality and hashing checks.
 
+> *Note:* `NSMapTable`'s focus on strong and weak references means that Swift's prevalent value types are a no go—reference types only, please.
+
 ### Usage
 
 Instances where one might use `NSMapTable` include non-copyable keys and storing weak references to keyed delegates or another kind of weak object.
 
+~~~{swift}
+let delegate: AnyObject = ...
+let mapTable = NSMapTable(keyOptions: .StrongMemory, valueOptions: .WeakMemory)
+
+mapTable.setObject(delegate, forKey: "foo")
+print("Keys: \(mapTable.keyEnumerator().allObjects)")
+~~~
 ~~~{objective-c}
 id delegate = ...;
 NSMapTable *mapTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
@@ -78,17 +98,39 @@ Equal to `NSPointerFunctionsObjectPointerPersonality`.
 
 `NSMapTable` doesn't implement [object subscripting](http://nshipster.com/object-subscripting/), but it can be trivially added in a category. `NSDictionary`'s `NSCopying` requirement for keys belongs to `NSDictionary` alone:
 
+~~~{swift}
+extension NSMapTable {
+    subscript(key: AnyObject) -> AnyObject? {
+        get {
+            return objectForKey(key)
+        }
+
+        set {
+            if newValue != nil {
+                setObject(newValue, forKey: key)
+            } else {
+                removeObjectForKey(key)
+            }
+        }
+    }
+}
+~~~
+
 ~~~{objective-c}
 @implementation NSMapTable (NSHipsterSubscripting)
 
 - (id)objectForKeyedSubscript:(id)key
 {
-	return [self objectForKey:key];
+    return [self objectForKey:key];
 }
 
 - (void)setObject:(id)obj forKeyedSubscript:(id)key
 {
-	[self setObject:obj forKey:key];
+    if (obj != nil) {
+        [self setObject:obj forKey:key];
+    } else {
+        [self removeObjectForKey:key];
+    }
 }
 
 @end

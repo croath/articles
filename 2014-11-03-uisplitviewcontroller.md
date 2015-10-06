@@ -3,6 +3,9 @@ title: UISplitViewController
 author: Natasha Murashev
 category: Cocoa
 excerpt: "The introduction of iPhone 6+ brought on a new importance for UISplitViewController. With just a few little tweaks, an app can now become Universal, with Apple handling most of the UI logic for all the different screen sizes."
+status:
+    swift: 2.0
+    reviewed: September 11, 2015
 ---
 
 The introduction of iPhone 6+ brought on a new importance for `UISplitViewController`. With just a few little tweaks, an app can now become Universal, with Apple handling most of the UI logic for all the different screen sizes.
@@ -69,7 +72,7 @@ Even when the navigation controller is in place, the UI is not that much better 
 
 The simplest way to fix this issue would be to somehow indicate that there is more to the app than what's currently on-screen. Luckily, the UISplitViewController has a **displayModeButtonItem**, which can be added to the navigation bar:
 
-```swift
+~~~{swift}
 override func viewDidLoad() {
     super.viewDidLoad()
 
@@ -78,7 +81,17 @@ override func viewDidLoad() {
     navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
     navigationItem.leftItemsSupplementBackButton = true
 }
-```
+~~~
+~~~{objective-c}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    // ...
+
+    self.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
+    self.navigationItem.leftItemsSupplementBackButton = YES;
+}
+~~~
 
 Build and Run on the iPad again, and now the user gets a nice indication of how to get at the rest of the app:
 
@@ -96,13 +109,9 @@ There is one more optimization we can do for the iPhone 6+ via [`UISplitViewCont
 
 When the user first launches the app, we can make the master view controller fully displayed until the user selects a list item:
 
-```swift
-import UIKit
-
+~~~{swift}
 class SelectColorTableViewController: UITableViewController, UISplitViewControllerDelegate {
     private var collapseDetailViewController = true
-
-    // MARK: UITableViewController
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,7 +121,7 @@ class SelectColorTableViewController: UITableViewController, UISplitViewControll
 
     // ...
 
-    // MARK: UITableViewDelegate
+    // MARK: - UITableViewDelegate
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         collapseDetailViewController = false
@@ -120,11 +129,48 @@ class SelectColorTableViewController: UITableViewController, UISplitViewControll
 
     // MARK: - UISplitViewControllerDelegate
 
-    func splitViewController(splitViewController: UISplitViewController, collapseSecondaryViewController secondaryViewController: UIViewController!, ontoPrimaryViewController primaryViewController: UIViewController!) -> Bool {
+    func splitViewController(splitViewController: UISplitViewController, collapseSecondaryViewController secondaryViewController: UIViewController, ontoPrimaryViewController primaryViewController: UIViewController) -> Bool {
         return collapseDetailViewController
     }
 }
-```
+~~~
+~~~{objective-c}
+// SelectColorTableViewController.h
+
+@interface SelectColorTableViewController : UITableViewController <UISplitViewControllerDelegate>
+@end
+
+// SelectColorTableViewController.m
+
+@interface SelectColorTableViewController ()
+
+@property (nonatomic) BOOL shouldCollapseDetailViewController;
+
+@end
+
+@implementation SelectColorTableViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    self.shouldCollapseDetailViewController = true;
+    self.splitViewController.delegate = self;
+}
+
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    self.shouldCollapseDetailViewController = false;
+}
+
+#pragma mark - UISplitViewControllerDelegate
+
+- (BOOL)splitViewController:(UISplitViewController *)splitViewController collapseSecondaryViewController:(UIViewController *)secondaryViewController ontoPrimaryViewController:(UIViewController *)primaryViewController {
+    return self.shouldCollapseDetailViewController;
+}
+
+@end
+~~~
 
 When the user first opens up the app on iPhone 6+ in portrait orientation, `SelectColorViewController` gets displayed as the primary view controller. Once the user selects a color or the app goes into the background, the `SelectColorViewController` gets collapsed again, and the `ColorViewController` is displayed:
 
