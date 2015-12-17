@@ -101,7 +101,7 @@ CGContextSetInterpolationQuality(context, kCGInterpolationHigh)
 
 CGContextDrawImage(context, CGRect(origin: CGPointZero, size: CGSize(width: CGFloat(width), height: CGFloat(height))), cgImage)
 
-let scaledImage = CGBitmapContextCreateImage(context).flatMap { UIImage(CGImage: $0 }
+let scaledImage = CGBitmapContextCreateImage(context).flatMap { UIImage(CGImage: $0) }
 ```
 
 `CGBitmapContextCreate` takes several arguments to construct a context with desired dimensions and amount of memory for each channel within a given colorspace. In the example, these values are fetched from the `CGImage`. Next, `CGContextSetInterpolationQuality` allows for the context to interpolate pixels at various levels of fidelity. In this case, `kCGInterpolationHigh` is passed for best results. `CGContextDrawImage` allows for the image to be drawn at a given size and position, allowing for the image to be cropped on a particular edge or to fit a set of image features, such as faces. Finally, `CGBitmapContextCreateImage` creates a `CGImage` from the context.
@@ -172,8 +172,8 @@ guard error == kvImageNoError else { return nil }
     
 // create a destination buffer
 let scale = UIScreen.mainScreen().scale
-let destWidth = Int(image.size.width * CGFloat(scalingFactor) * scale)
-let destHeight = Int(image.size.height * CGFloat(scalingFactor) * scale)
+let destWidth = Int(image.size.width * 0.5 * scale)
+let destHeight = Int(image.size.height * 0.5 * scale)
 let bytesPerPixel = CGImageGetBitsPerPixel(image.CGImage) / 8
 let destBytesPerRow = destWidth * bytesPerPixel
 let destData = UnsafeMutablePointer<UInt8>.alloc(destHeight * destBytesPerRow)
@@ -242,5 +242,5 @@ Loading, scaling, and displaying a reasonably large (1024 ⨉ 1024 px 1MB PNG) r
 - For general image scaling without any additional functionality, **`UIGraphicsBeginImageContextWithOptions`** is probably the best option.
 - If image quality is a consideration, consider using **`CGBitmapContextCreate`** in combination with **`CGContextSetInterpolationQuality`**.
 - When scaling images with the intent purpose of displaying thumbnails, **`CGImageSourceCreateThumbnailAtIndex`** offers a compelling solution for both rendering and caching.
-- Unless you're already working with `vImage`, the extra work to use the low-level Accelerate framework for resizing doesn't pay off.
+- Unless you're already working with **`vImage`**, the extra work to use the low-level Accelerate framework for resizing doesn't pay off.
 
